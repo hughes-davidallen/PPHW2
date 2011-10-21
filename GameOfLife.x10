@@ -1,31 +1,59 @@
 import x10.util.Random;
 
 public class GameOfLife {
+	public val TheUniverseSeqRed:Array[Boolean](2);
+	public val TheUniverseSeqBlack:Array[Boolean](2);
+	public val TheUniverseParRed:Array[Boolean](2);
+	public val TheUniverseParBlack:Array[Boolean](2);
 	
-	public val TheUniverseSeq:Array[Boolean](2);
-	public val TheUniversePar:Array[Boolean](2);
-	
+	public var TheUniverseSeq:Array[Boolean](2);
+	public var TheUniversePar:Array[Boolean](2);
+
 	/**
 	 * Creates an m x n 0 based array with true or false. 
 	 * false indicate dead cells, true indicates live ones 
 	 */
 	public def this(m:Int, n:Int) { 
 		val ran = new Random();
-		TheUniverseSeq = new Array[Boolean]((0..(m - 1)) * (0..(n - 1)), ran.nextBoolean());
-		TheUniversePar = new Array[Boolean]((0..(m - 1)) * (0..(n - 1)), false);
+		TheUniverseSeqRed = new Array[Boolean]((0..(m - 1)) * (0..(n - 1)), ran.nextBoolean());
+		TheUniverseSeqBlack = new Array[Boolean]((0..(m - 1)) * (0..(n - 1)), false);
+		TheUniverseParRed = new Array[Boolean]((0..(m - 1)) * (0..(n - 1)), false);
+		TheUniverseParBlack = new Array[Boolean]((0..(m - 1)) * (0..(n - 1)), false);
 		for (i in (0..(m - 1))) {
-			for ( j in (0..(n - 1))) { 
-				if (TheUniverseSeq(i, j)) TheUniversePar(i, j) = true; 
+			for (j in (0..(n - 1))) { 
+				if (TheUniverseSeqRed(i, j)) {
+					TheUniverseSeqBlack(i, j) = true;
+					TheUniverseParRed(i, j) = true;
+					TheUniverseParBlack(i, j) = true;
+				} 
 			}
 		}
 	}
-	
+
+	/**
+	 * Computes on step of the sequential algorithm
+	 */
+	private def SeqStep(source:Array[Boolean](2), dest:Array[Boolean](2)) {
+		for ([i, j] in source) {
+			if (source(i, j)) dest(i, j) = true;
+		}
+	}
+
 	/**
 	 * Sequential simulation of the game of life for endOfTime iterations
 	 */
 	public def BigBangSeq(endOfTime:Int) {
 		for (time in 0..(endOfTime - 1)) {
-			/** Change me **/
+			if (time % 2 == 0) {
+				SeqStep(TheUniverseSeqRed, TheUniverseSeqBlack);
+			} else {
+				SeqStep(TheUniverseSeqBlack, TheUniverseSeqRed);
+			}
+		}
+		if (endOfTime % 2 == 0) {
+			TheUniverseSeq = TheUniverseSeqRed;
+		} else {
+			TheUniverseSeq = TheUniverseSeqBlack;
 		}
 	}
 
