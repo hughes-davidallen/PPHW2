@@ -112,4 +112,4 @@ all:
 
 .PHONY: $(P1).out clean
 clean:
-	rm -f *.cc *.h *.exe *.inc *.out *.mpi *~ \#*
+	rm -f *.cc *.h *.exe *.inc *.out *.mpi *~ *.java *.class \#*
