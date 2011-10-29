@@ -12,15 +12,15 @@ public class MaxInt {
 	// size of input vector
 	val insize:Int;
 
-	var serialTime:Long=0;
-	var parallelTime:Long=0;
+	var serialTime:Long = 0;
+	var parallelTime:Long = 0;
 
-	static val Meg = 1000*1000;
+	static val Meg = 1000 * 1000;
 
 	/** Constructor **/
 	public def this(inSize:Int) {
 		insize = inSize;
-		inVec = new Array[Int](inSize,0);
+		inVec = new Array[Int](inSize, 0);
 	}
 
 	/** populateInput() **/
@@ -37,7 +37,7 @@ public class MaxInt {
 	public def resetTimers() {
 		serialTime = 0;
 		parallelTime = 0;
-	} 
+	}
 
 	public def serialTime() : Long {
 		return serialTime;
@@ -53,28 +53,27 @@ public class MaxInt {
 		val time = System.nanoTime();
 
 		for (var i:Int = 0; i < insize; i++) {
-			if ( inVec(i) > serialMax) {
+			if (inVec(i) > serialMax) {
 				serialMax = inVec(i);
 			}
 		}
-		serialTime += (System.nanoTime()-time)/Meg;
+		serialTime += (System.nanoTime() - time) / Meg;
 	}
 
 	/** Parallel Method **/
-	public def runInParallel(numAsyncs:Int) {	 
+	public def runInParallel(numAsyncs:Int) {
 		parallelMax = 0;
-
 		val time = System.nanoTime();
-		 
-		finish for ([i] in 0..(numAsyncs-1)){
-			async chunkCompute(i , numAsyncs);
+ 
+		finish for ([i] in 0..(numAsyncs - 1)){
+			async chunkCompute(i, numAsyncs);
 		}
-		parallelTime += (System.nanoTime()-time)/Meg; 
+		parallelTime += (System.nanoTime() - time) / Meg;
 	}
 
 	/** helper for the parallel method **/
 	public def chunkCompute(id:Int, numAsyncs:Int) {
-		val chunkSize = inVec.size/numAsyncs;
+		val chunkSize = inVec.size / numAsyncs;
 		val start = chunkSize * id;
 		val end = (id == numAsyncs-1)?inVec.size-1:start + chunkSize-1;
 		for (var i:Int = start; i <= end; i++) {
@@ -86,7 +85,6 @@ public class MaxInt {
 
 	/** helper for validating result **/
 	public def compareSeqVsParallel() : Boolean {
- 
 		Console.OUT.println("serial max = " + serialMax + " parallel max = " + parallelMax); 
 		if (serialMax == parallelMax) return true; 
 		return false; 
@@ -109,10 +107,10 @@ public class MaxInt {
 		mf.populateInput();
 
 		// warmup run
- 		Console.OUT.println( "Warmup Run, serial ... " );
+ 		Console.OUT.println("Warmup Run, serial ... ");
  		mf.runInSequence();
 
-	 	Console.OUT.println( "Warmup Run, parallel ... " );
+	 	Console.OUT.println("Warmup Run, parallel ... ");
  		mf.runInParallel(num_asyncs);
 
 		// Verify the correctness
