@@ -1,0 +1,31 @@
+This is where I like to write comments
+
+Problem 2:
+	a) The code as it was given to me is unsafe; in the chunkCompute method,
+	assignment to parallelMax is atomic, but the comparison of parallelMax to
+	the Int in the current vector position is exposed to a race condition.  This
+	could cause a result different from the sequential version if one of the
+	asyncs makes the comparison (meaning reads parallelMax) and decides to
+	update it, but then another of the asyncs reads and updates parallelMax
+	before the first async can complete the update.  In that case, the first
+	async could overwrite a higher value with a lower value and the result would
+	be incorrect.  The fix is to move the atomic keyword outside of the if
+	block.  That way, reading parallelMax and updating it happen as one atomic
+	operation, and there's no opportunity for an activity to read parallelMax
+	while another activity is looking at it.  This will always produce the right
+	result.  This is safe.
+
+	b) The code is inefficient with the fix because of the overhead of spawning
+	asyncs as well as the overhead of enforcing atomic computation.  Only
+	allowing one activity to look at parallelMax at a time almost removes the
+	benefit of parallelizing the program, and having to manage extra activities
+	on top of that makes the parallel version slower.
+
+	c) 
+
+	d) 
+
+	e) Safety is a stronger condition than determinacy.  The solution is
+	determinate because it is safe.
+
+	f) 
