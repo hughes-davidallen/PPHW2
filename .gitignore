@@ -1,2 +1,6 @@
 *.java
 *.class
+*.cc
+*.h
+*.out
+*.exe
