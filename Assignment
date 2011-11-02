@@ -1,0 +1,158 @@
+##
+## Homework 2 
+## COMS 4130 Principles and Practice of Parallel Programming 
+## Fall 2011
+##
+
+**** Problem 0 ( Running on Three Musketeers, 0 points ) ****
+
+a.(0 points) We recommend that you use SLURM 
+(https://computing.llnl.gov/linux/slurm/) on the Three Musketeers cluster 
+when you are measuring the performance of your code. 
+Read http://docs.codehaus.org/display/XTENLANG/X10+Application+Development
+for David Grove and S. Kodaly's notes on how to run on Three Musketeers.
+As described in their notes,you need to setup public-key based ssh 
+authentication. 
+
+b.(0 points) Inspect the Makefile provided to you to aid you in running your 
+programs. Type "make <target>" to run, where <target> = spellcheck , maxint, 
+markfours or gameoflife. You may want to play with the compilation and SLURM 
+flags in the makefile. You are welcome to use your own makefiles, you are 
+also welcome to compile and run your code manually 
+( salloc -n1 srun.x10sock ./helloWorld <arg_1> <arg_2> ... ). 
+
+c.(0 points) 
+Skim http://dist.codehaus.org/x10/documentation/languagespec/x10-env.pdf. 
+Pay special attention to X10 Runtime Variables. You are welcome to play with 
+the environment variables, and perhaps you will figure out the optimal set and 
+we will share it with the class for next HW. But it is likely that you at least 
+need to set X10_NTHREADS to 24( type "export X10_NTHREADS=24", then 
+"echo $X10_NTHREADS" to make sure you set it correctly), as there are 24 
+hardware threads per node available to you. The makefile actually tries to set
+this for you, but it will have no effect if you don't already have a variable 
+named X10_NTHREADS defined. We recommend putting these env variables in your 
+.bashrc so that you don't have to set the env variables manually every time you 
+log in. 
+ 
+
+
+
+**** Problem 1 ( SpellCheck, 32 points ) ****
+
+As in HW1, you are to write a homemade spell-checker. Use the dictionary at 
+/usr/share/dict/words on Three Musketeers. All method signatures mentioned 
+below have been provided in SpellCheck.x10.
+
+a.(4 points) Fill in the "check()" method. You should take in a word and 
+perform a case-insensitive binary search for that word in the dictionary. 
+  
+b.(2 points) Fill in the runSequential() method. This method takes in a Rail
+of words to spellcheck, and fills in a corresponding boolean Rail (also passed
+in as an argument to the function) indicating whether or not the spelling is 
+correct ( true == correct, false == misspelled word ). This method should be 
+sequential.
+
+c.(9 points) Fill in the runInParallel() method with a parallel version of the 
+code you wrote in runSequential(). The function arguments now 
+include a parameter "numAsyncs" which indicates the maximum number of asyncs 
+you should spawn inside the function body. Soon you will be asked to vary this 
+parameter and demonstrate scaling. 
+
+For this assignment, you can write your code for a single place.
+
+d.(3 points) Is the code you wrote in runInParallel() safe ? (We hope the answer
+is yes). Argue why your code is safe.
+
+e.(3 points) Is the code you wrote in runInParallel() determinate ? Why or why
+not ?       
+
+f.(4 points) Set the number of asyncs to 8. In the makefile, the input vector 
+size is set to 10. Vary the input vector size until you see reasonable scaling
+for the parallel version of your code. Take the size upto hundreds of thousands
+if necessary. Explain why increasing your input size had an effect on your 
+performance numbers. 
+
+g.(7 points) Keeping the input size sufficiently large and constant, vary the 
+number of asyncs (e.g. 1,2,4,8 ...) and demonstrate the scalability of your 
+code. Keep increasing the number of asyncs until you no longer see performance 
+improvements. Keep increasing the number until you actually see worsening 
+performance. Explain what you see. Your timing numbers can be in the form of 
+a table, plot or even copy-paste of screen outputs.  
+
+
+
+
+**** Problem 2 ( MaxInt, 25 points ) ****
+
+You are given an input vector of integers. You are to find the maximum value
+in the vector. Use the template MaxInt.x10. A serial version of the code has 
+been provided in runInSequence(). 
+
+a.(5 points) A noble attempt was made to give you a parallel version of the 
+code. Unfortunately, the TAs for this class are too careless to be TAs 
+for this class so they made a mistake. The parallel code as provided is not 
+safe. Can you spot the bug ? Can you suggest a simple one line (or less) 
+fix to make the program safe ? Argue why the fix made the program safe. 
+
+b.(2 points) Run the fix you made in (a) with the default input vector size 
+in the makefile (5000000) and with asyncs 1,2 and 8 (again,these are 
+defaults in the makefile). Why do you think your code is performing so poorly?
+
+c.(8 points) You have angered CORR, the Great God of Concurrency. As 
+punishment, he took away the "atomic" keyword from you. Write a safe parallel
+version of runInParallel() that does not use the atomic keyword. 
+
+d.(2 points) Argue why the program you wrote in (c) is safe. 
+
+e.(3 points) Is the program you wrote in (c) determinate ? Why or why not? 
+
+f.(5 points) Vary the number of asyncs and show the best scaling you can in 
+a single place. 
+
+
+
+
+**** Problem 3 ( MarkFours, 22 points ) ****
+
+You are given a balanced but unordered binary tree. The node keys can contain
+values from 0 to 4. Your task is to find the nodes with key == 4 and "mark" 
+them. For MarkFours.x10, this simply means setting the variable named "mark"
+to true.  
+
+a.(14 points) Fill in MarkFoursPar(), the parallel version of MarkFoursSeq(). 
+Show the best scaling you can on a single place. 
+
+b.(4 points) Argue about the safety and correctness of your program. 
+
+c.(4 points) Is the program you wrote in (a) determinate ? Why or why not? 
+
+WARNING: Because the size of the tree is exponential in tree_depth, try not to 
+increase the tree depth too much. There is a hard check in the 
+code that rejects tree_depths above 20, you can change it. Just know that 
+going too high will cause an untimely death to the program.
+
+
+
+
+**** Problem 4 ( Game of Life, 21 points ) ****
+
+Read http://en.wikipedia.org/wiki/Conway's_Game_of_Life. 
+
+a.(11 points) You are to implement a game of life simulation in X10. We provided
+you a template in GameOfLife.x10. Modify BigBangSeq(), BigBangPar() and 
+validate(). You are free to add more parameters/fields etc., you are
+even allowed to change the data structures that hold the twin universes. 
+Also feel free to chage the constructor to populate the universe differently. 
+
+b.(3 points) Argue why the parallel version of your program is safe and correct.
+
+c.(3 points) Is your program deterministic ? Why or why not ?
+
+d.(4 points) Show the best scaling you can on a single place. We understand 
+that due to the random nature of the input your timing numbers may be a little 
+inconsistent (especially when the universe dies very fast), and we will take 
+that into consideration.
+
+Things you may want to think about : 
+- Handling boundary conditions. What do you do with cells whose neighbors fall
+out of bounds?
