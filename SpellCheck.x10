@@ -75,34 +75,54 @@ public class SpellCheck {
     	/**
     	 * * Implement a capitalization-insensitive spellcheck here.
     	 * */
-    	
-    	/*** Change Me ***/
-    	
+
+	var min:Int = 0;
+	var max:Int = dict.size;
+	var current:Int;
+
+	while (max > min) {
+		current = (min + max) / 2;
+		var comp:Int = word.compareToIgnoreCase(dict(current));
+
+		if (comp == 0)
+			return true;
+		else if (comp > 0)
+			min = current + 1;
+		else if (comp < 0)
+			max = current - 1;
+	}
+
     	return false; 
     }
 	
     /** Search the dictionary in sequence */
-    public def runSequential(words:Rail[String],serialResult:Rail[Boolean]) { 
-    	
+    public def runSequential(words:Rail[String],serialResult:Rail[Boolean]) {
     	val time = System.nanoTime();
-    	
-    	/*** Change Me ***/
-    	
-    	
-    	serialTime += (System.nanoTime()-time)/Meg;
 
-    	
+	val max = words.size - 1;
+	for (i in 0..max)
+		serialResult(i) = check(words(i));
+
+    	serialTime += (System.nanoTime()-time)/Meg;
     }
     
     /** Search the dictionary in parallel */
     public def runInParallel(words:Rail[String], parallelResult:Rail[Boolean], numAsyncs:Int) { 
     	
     	val time = System.nanoTime();
-    	
-    	/*** Change Me ***/ 
+
+	val chunkSize = words.size / numAsyncs;
+	val num = numAsyncs - 1;
+	finish for (i in 0..num) {
+		async {
+			val start = i * chunkSize;
+			val max = (i == num)?words.size - 1:start + chunkSize;
+			for (j in start..max)
+				parallelResult(j) = check(words(j));
+		}
+	}
 
     	parallelTime += (System.nanoTime()-time)/Meg;
-
     }
     
 
