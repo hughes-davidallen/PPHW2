@@ -1,5 +1,10 @@
 This is where I like to write comments
 
+Problem 1:
+	d) Yes, it is safe, and I will tell you why
+
+	e) Yes, safety implies determinacy
+
 Problem 2:
 	a) The code as it was given to me is unsafe; in the chunkCompute method,
 	assignment to parallelMax is atomic, but the comparison of parallelMax to
@@ -16,10 +21,11 @@ Problem 2:
 	result.  This is safe.
 
 	b) The code is inefficient with the fix because of the overhead of spawning
-	asyncs as well as the overhead of enforcing atomic computation.  Only
-	allowing one activity to look at parallelMax at a time almost removes the
-	benefit of parallelizing the program, and having to manage extra activities
-	on top of that makes the parallel version slower.
+	asyncs as well as the overhead of enforcing atomic computation.  At present,
+	using atomic obtains a place-wide exclusive lock, meaning that no other
+	acitivity in the whole place is allowed to advance during an atomic
+	computation.  As the number of asyncs increases, the penalty of a place-wide
+	lock increases because there are more activities that cannot advance.
 
 	c) 
 
@@ -29,3 +35,22 @@ Problem 2:
 	determinate because it is safe.
 
 	f) 
+
+Problem 3:
+	a) A little experimentation showed that the smallest subtree fo which the
+	extra overhead of an async was worth-while is one of depth 15.  For that
+	reason, if my solution reaches a node that has subtrees of depth 15, it will
+	invoke the sequential method on each to finish the marking.  The idea is
+	that every depth 15 subtree will be computed by an async running the
+	sequential method.  That way every async will perform a large enough portion
+	of work to justify its existence.
+
+	One benefit of this approach is that it's simple, only a few more lines of
+	code that the sequential approach.  It sees speedups on the order of 4 for
+	tree depths up to 20, and the speedups get larger for bigger trees after
+	that.  For a tree with a depth of 23, the speedup of the parallel version
+	over the sequential version is almost 8.
+
+	b) This is safe and correct because it agrees with the sequential version ********************************************************************************
+
+	c) I'm not sure about the meaning of determinate.  ***********************
