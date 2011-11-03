@@ -1,13 +1,14 @@
 import x10.util.Random;
+import x10.util.concurrent.AtomicInteger;
 
 public class MaxInt {
 
 	// Input vector
-	val inVec: Array[Int](1);
+	val inVec:Array[Int](1);
 
 	// results
-	var serialMax: Int = 0;
-	var parallelMax: Int = 0;
+	var serialMax:Int = 0;
+	val parallelMax = new AtomicInteger(0);
 
 	// size of input vector
 	val insize:Int;
@@ -62,7 +63,7 @@ public class MaxInt {
 
 	/** Parallel Method **/
 	public def runInParallel(numAsyncs:Int) {
-		parallelMax = 0;
+		parallelMax.set(0);
 		val time = System.nanoTime();
  
 		finish for ([i] in 0..(numAsyncs - 1)){
@@ -77,16 +78,17 @@ public class MaxInt {
 		val start = chunkSize * id;
 		val end = (id == numAsyncs-1)?inVec.size-1:start + chunkSize-1;
 		for (var i:Int = start; i <= end; i++) {
-			if (inVec(i) > parallelMax) {
-				atomic parallelMax = inVec(i);
-			}
+			val currentMax = parallelMax.get();
+			while (inVec(i) > currentMax)
+				if (parallelMax.compareAndSet(currentMax, inVec(i)))
+					break;
 		}
 	}
 
 	/** helper for validating result **/
 	public def compareSeqVsParallel() : Boolean {
-		Console.OUT.println("serial max = " + serialMax + " parallel max = " + parallelMax); 
-		if (serialMax == parallelMax) return true; 
+		Console.OUT.println("serial max = " + serialMax + " parallel max = " + parallelMax.get()); 
+		if (serialMax == parallelMax.get()) return true; 
 		return false; 
 	}
 
