@@ -113,8 +113,25 @@ public class MarkFours {
 	/**
 	 * Parallel Code to Count Fours
 	 */
-	public def MarkFoursPar(root:TreeNode) {
-		/** Change Me **/
+	public def MarkFoursPar(root:TreeNode, depth:Int) {
+		if(root != null) {
+			if(root.key == 4) {
+				root.mark = true;
+			}
+
+			if (depth > treeDepth - 15) {
+				finish {
+					async MarkFoursSeq(root.left);
+					MarkFoursSeq(root.right);
+				}
+				return;
+			}
+
+			finish {
+				async MarkFoursPar(root.left, depth + 1);
+				MarkFoursPar(root.right, depth + 1);
+			}
+		}
 	}
 
 	/** validate in dfs fashion **/
@@ -148,6 +165,7 @@ public class MarkFours {
 		}
 
 		val cf:MarkFours = new MarkFours();
+		cf.treeDepth = tree_depth;
 		
 		// Allocate pool of tree nodes, one "new" lot more efficient than a million "new"'s
 		cf.allocateTreeNodes(tree_depth);
@@ -163,7 +181,7 @@ public class MarkFours {
 		cf.MarkFoursSeq(rootS);
 
 		Console.OUT.println(" Warmup Run, parallel ... ");
-		finish cf.MarkFoursPar(rootP);
+		finish cf.MarkFoursPar(rootP, 0);
 
 		// Console.OUT.println("finished warmups");
 		// cf.printTree(rootS,"rootS"); 
@@ -190,7 +208,7 @@ public class MarkFours {
 			cf.serialTime += (System.nanoTime() - time) / Meg;
 			
 			val time2 = System.nanoTime();
-			cf.MarkFoursPar(rootP);
+			cf.MarkFoursPar(rootP, 0);
 			cf.parallelTime += (System.nanoTime() - time2) / Meg;
 		}
 
