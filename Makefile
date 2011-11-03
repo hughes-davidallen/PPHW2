@@ -11,7 +11,7 @@ SEED=40
 # SpellCheck Parameters 
 P1=SpellCheck
 DICT_LOC=/usr/share/dict/words
-NUM_WORDS=10
+NUM_WORDS=10000
 P1_ASYNCS=1 2 4
 P1_NUM_TRIALS=2
 
@@ -24,7 +24,7 @@ P2_NUM_TRIALS=2
 
 # MarkFour Parameters 
 P3=MarkFours
-DEPTH=10
+DEPTH=20
 P3_NUM_TRIALS=2
 
 # GameOfLife Parameters 
@@ -112,4 +112,4 @@ all:
 
 .PHONY: $(P1).out clean
 clean:
-	rm -f *.cc *.h *.exe *.inc *.out *.mpi *~ *.java *.class \#*
+	rm -f *.cc *.h *.exe *.inc *.out *.mpi *~ *.java *.class \#* hosts.*
