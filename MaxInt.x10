@@ -26,10 +26,10 @@ public class MaxInt {
 
 	/** populateInput() **/
 	public def populateInput() {
-		val seed:Int = 100;
+		val seed:Int = 174;
 		val rand = new Random(seed);
 
-		for ( p in inVec ) {
+		for (p in inVec) {
 			inVec(p) = rand.nextInt();
 		}
 	}
