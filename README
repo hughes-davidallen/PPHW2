@@ -131,6 +131,10 @@ Problem 3:
 	solution is safe it must be determinate.
 
 Problem 4:
+	Note:  This implementation of GameOfLife does not make use of the command
+	line argument 'seed'.  The reference to seed in the Makefile has been
+	removed.
+
 	a) This implementation of the Game of Life simulator uses Red-Black
 	alternation so that teh results of a step depend only on the previous step.
 	Thus, four copies of the Universe are maintained, two for the sequential
