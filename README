@@ -102,7 +102,10 @@ Problem 2:
 	are not at all the same as the intermediate values for the sequential
 	version.
 
-	f) 
+	f) Although the current implementation has better performance than the safe
+	version using the atomic keyword, the performance is not good enough that
+	it doesn't time out on the slurm scheduler, so I don't know what the scaling
+	is like.
 
 Problem 3:
 	a) A little experimentation showed that the smallest subtree for which the
@@ -137,6 +140,29 @@ Problem 4:
 	Universe array are always dead.  This approach lends itself to simplicity in
 	the implementation.
 
-	b) 
+	b) The parallel version of the code is safe and correct because the effect
+	sets of all asyncs are disjoint.  I use a block-cyclic distribution to
+	divide the columns of the Universe into working sets.  Each column is
+	assigned to exactly 1 async.  Each step has a source Universe and a
+	destination Universe.  At each step, the source Universe is not updated, so
+	we don't need to worry about it.  In the destination universe, each column
+	is touched by exactly one async.  There is complete coverage, but no
+	overlap, and the results match the results of the serial computation.  The
+	parallel code is safe and correct.
 
-	c) 
+	c) Echoing answers from previous questions, the answer is yes, the parallel
+	code is deterministic in that the final result after computation is the same
+	as the serial result.  Further, the two Universes will be identical after
+	every step in the computation.  Within a step, the various cells in the
+	universes may be updated in different orders, but the results will always
+	be the same.  The diamond is closed after every step, and the computation is
+	deterministic.
+
+	d) This algorithm exhibits good scaling for one place.  It doesn't matter
+	that the partitions that an async works on aren't contiguous because all of
+	the data is in the same place.
+
+		NumAsyncs:		Seq Time:	Par Time:	Speedup:
+		1				4409		4454		0.99
+		2				4394		3121		1.4	
+		4				4393		1967		2.23

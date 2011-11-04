@@ -32,7 +32,7 @@ P4=GameOfLife
 NUM_ITERATIONS=1000
 UNIVERSE_LENGTH=500
 UNIVERSE_WIDTH=500
-P4_ASYNCS=1
+P4_ASYNCS=1 2 4 8
 
 
 spellcheck: $(P1).out
@@ -89,7 +89,7 @@ $(P4).out: $(P4_ASYNCS:%=$(P4).%.buildandrun)
 	@echo $(P4).%.buildandrun
 
 $(P4).%.buildandrun: $(P4).exe   
-	salloc -n1 srun.x10sock ./$(P4).exe $(UNIVERSE_LENGTH) $(UNIVERSE_WIDTH) $(SEED) $(NUM_ITERATIONS) $* > $(P4).$*.out
+	salloc -n1 srun.x10sock ./$(P4).exe $(UNIVERSE_LENGTH) $(UNIVERSE_WIDTH) $(NUM_ITERATIONS) $* > $(P4).$*.out
 	@echo "Dumping contents of $(P4).$*.out ... "
 	@grep "" $(P4).$*.out
 	@echo " "
