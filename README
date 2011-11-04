@@ -1,9 +1,57 @@
-This is where I like to write comments
+David Hughes - dah2117 - Parallel Programming Homework 2
 
 Problem 1:
-	d) Yes, it is safe, and I will tell you why
+	a-c) Implemented the methods as outlined in the assignment.
 
-	e) Yes, safety implies determinacy
+	d) Yes, the parallel spell checker is safe because the parallelism is
+	disjoint.  That is, the effect sets of all asyncs are disjoint.  The only
+	shared state that ever gets modified is the Rail of booleans that tells
+	which of the words are spelled correctly.  Because of the way the Rail is
+	paritioned, no two asyncs will ever modify the same position in the Rail.
+	This means that the program is safe and will compute the same result as the
+	sequential program.
+
+	e) Yes, safety is a stronger condition that determinacy.  The program must
+	be determinate because it is safe.  The sate of the parallel program at the
+	end of execution is identical to the state of the program at the end of the
+	sequential computation.  The diamnod is closed, as it were, and the program
+	is determinate.
+
+	f) The benefits of parallelization are not immediately obvious with a small
+	input size.  This is because there is some overheada involved with spawning
+	an async.  If the Rail of words is relatively small, running spellcheck
+	sequentially is faster than incurring the overhead of spawning asyncs to
+	execute in parallel.  Also, with a small input size, the programs run so
+	quickly that measuring a performance difference between them is difficult.
+	With an input size of 10, the measured executiong time for both programs was
+	0ms.  With an input size of 50000, the serial program finished in 88ms, and
+	the parallel program finished in 14ms, a speedup of about 6.
+
+	g) For a fixed input size of 50000, speedup vs. the number of asyncs is as
+	follows:
+
+		Number of asyncs:	Seq Time:	Par Time:	Speedup:
+		1					86			86			1
+		2					84			44			1.9
+		4					88			24			3.67
+		8					90			14			6.43
+		16					89			7			12.7
+		32					90			7			12.86
+		64					86			6			14.3
+		128					89			5			17.8
+		256					89			5			17.8
+		512					88			6			14.67
+		1024				86			12			7.17
+
+	The speedups are fairly steady for between 16 and 512 asyncs.  In this
+	region, the cost of spawning an async and the benefit of having another
+	activity to work balance each other out.  Past 512, though, the cost of
+	spawning an async becomes too much to justify spawning it, at least for this
+	input size.  With a much larger input array, we would likely continue to
+	see good speedups with larger numbers of asyncs.  By the time there are 1024
+	asyncs working on the spellcheck, each async is resonsible for only 48
+	words, meaning each async will perform 48 binary searches.  It appears that
+	that is not enough work to justify an async.
 
 Problem 2:
 	a) The code as it was given to me is unsafe; in the chunkCompute method,
@@ -27,17 +75,37 @@ Problem 2:
 	computation.  As the number of asyncs increases, the penalty of a place-wide
 	lock increases because there are more activities that cannot advance.
 
-	c) 
+	c) I implemented the parallel version of the code without the atomic keyword
+	by instead using the AtomicInteger type for the parallelMax variable.
+	Updating parallelMax involves using a Compare and Set operation so that the
+	current value of parallelMax can never be overwritten by a lower value.
 
-	d) 
+	d) This implementation is safe even though there is mutable shared state
+	(the value parallelMax) because all operations on parallelMax commute.  At
+	the end of execution, parallelMax will have the value of the largest integer
+	in the array.  It may hold intermediate values different from the
+	intermediate values that sequentialMax holds, but the final values will be
+	the same.  When an async finds a value in the array greater than the current
+	value of parallelMax, it updates parallelMax using compareAndSet.  That way,
+	if parallelMax has been updated since the async in question has read it, it
+	will not be updated, and the current async must make the comparison again
+	before decided to try to update parallelMax again.  Thus a lower value can
+	never be written over a higher value of parallelMax.  This produces the
+	correct result.
 
-	e) Safety is a stronger condition than determinacy.  The solution is
-	determinate because it is safe.
+	e) This parallel version is determinate in a loose sense in that at the end
+	of its execution, the program state will be identical to the program state
+	of the equivalent sequential version.  (That is, the variable holding the
+	max value, the only variable that ever changes, will be the same.)  Thus the
+	diamond is closed and the program is determinate.  On the other hand, the
+	program state is allowed to undergo intermediate changes along the way that
+	are not at all the same as the intermediate values for the sequential
+	version.
 
 	f) 
 
 Problem 3:
-	a) A little experimentation showed that the smallest subtree fo which the
+	a) A little experimentation showed that the smallest subtree for which the
 	extra overhead of an async was worth-while is one of depth 15.  For that
 	reason, if my solution reaches a node that has subtrees of depth 15, it will
 	invoke the sequential method on each to finish the marking.  The idea is
@@ -51,6 +119,24 @@ Problem 3:
 	that.  For a tree with a depth of 23, the speedup of the parallel version
 	over the sequential version is almost 8.
 
-	b) This is safe and correct because it agrees with the sequential version ********************************************************************************
+	b) This parallel program is correct because it produces the same result as
+	the sequential version of the code.  It is safe because the effect sets of
+	all the asyncs are disjoint.  That is, no two asyncs will ever look at the
+	key or try to modify the mark of a single node.
 
-	c) I'm not sure about the meaning of determinate.  ***********************
+	c) As with the solution to problem 1, safety implies determinacy.  If the
+	solution is safe it must be determinate.
+
+Problem 4:
+	a) This implementation of the Game of Life simulator uses Red-Black
+	alternation so that teh results of a step depend only on the previous step.
+	Thus, four copies of the Universe are maintained, two for the sequential
+	computation and two for the parallel computation.
+
+	Boundaries are handled by assuming that all cells just outside of the
+	Universe array are always dead.  This approach lends itself to simplicity in
+	the implementation.
+
+	b) 
+
+	c) 
