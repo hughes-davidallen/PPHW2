@@ -77,12 +77,15 @@ public class MaxInt {
 		val chunkSize = inVec.size / numAsyncs;
 		val start = chunkSize * id;
 		val end = (id == numAsyncs-1)?inVec.size-1:start + chunkSize-1;
-		for (var i:Int = start; i <= end; i++) {
-			val currentMax = parallelMax.get();
-			while (inVec(i) > currentMax)
-				if (parallelMax.compareAndSet(currentMax, inVec(i)))
-					break;
+		var localMax:Int = inVec(start);
+		for (var i:Int = start + 1; i <= end; i++) {
+			if (inVec(i) > localMax)
+				localMax = inVec(i);
 		}
+		val currentMax = parallelMax.get();
+		while (localMax > currentMax)
+			if (parallelMax.compareAndSet(currentMax, localMax))
+				break;
 	}
 
 	/** helper for validating result **/
